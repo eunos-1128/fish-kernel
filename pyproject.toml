@@ -5,7 +5,10 @@ description = "Add your description here"
 authors = [
     { name = "UENO, M.", email = "eunosium-1128@live.jp" }
 ]
-dependencies = []
+dependencies = [
+    "pexpect>=4.9.0",
+    "ipykernel>=6.29.4",
+]
 readme = "README.md"
 requires-python = ">= 3.8"
 
