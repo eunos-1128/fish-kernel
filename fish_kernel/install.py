@@ -42,7 +42,7 @@ def _is_root() -> bool:
 
 
 def main(argv: Optional[list[Any]] = None):
-    parser = argparse.ArgumentParser(description="Install KernelSpec for Bash Kernel")
+    parser = argparse.ArgumentParser(description="Install KernelSpec for Fish Kernel")
     prefix_locations = parser.add_mutually_exclusive_group()
 
     prefix_locations.add_argument(

@@ -10,7 +10,7 @@ from ipykernel.kernelbase import Kernel
 from pexpect import replwrap, EOF
 import pexpect
 
-from .display import extract_contents, build_cmds
+# from .display import extract_contents, build_cmds
 
 
 __version__ = "0.0.1"
@@ -158,7 +158,7 @@ class FishKernel(Kernel):
             ps2 = self.unique_prompt + "\[\]" + "+"
             prompt_change = "PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
             # Using IREPLWrapper to get incremental output
-            self.fishwrapper = IREPLWrapper(
+            self.fish_wrapper = IREPLWrapper(
                 child,
                 "\$",
                 prompt_change,
@@ -171,11 +171,11 @@ class FishKernel(Kernel):
             signal.signal(signal.SIGPIPE, old_sigpipe_handler)
 
         # Disable bracketed paste (see <https://github.com/eunos-1128/fish-kernel/issues/117>)
-        self.fishwrapper.run_command(
+        self.fish_wrapper.run_command(
             "bind 'set enable-bracketed-paste off' >/dev/null 2>&1 || true"
         )
         # Register Fish function to write image data to temporary file
-        self.fishwrapper.run_command(build_cmds())
+        self.fish_wrapper.run_command(build_cmds())
 
     def process_output(self, output):
         if not self.silent:
@@ -245,15 +245,15 @@ class FishKernel(Kernel):
             # output.  Also note that the return value from
             # run_command is not needed, because the output was
             # already sent by IREPLWrapper.
-            self.fishwrapper.run_command(code.rstrip(), timeout=None)
+            self.fish_wrapper.run_command(code.rstrip(), timeout=None)
         except KeyboardInterrupt:
-            self.fishwrapper.child.sendintr()
+            self.fish_wrapper.child.sendintr()
             interrupted = True
-            self.fishwrapper._expect_prompt()
-            output = self.fishwrapper.child.before
+            self.fish_wrapper._expect_prompt()
+            output = self.fish_wrapper.child.before
             self.process_output(output)
         except EOF:
-            output = self.fishwrapper.child.before + "Restarting Fish"
+            output = self.fish_wrapper.child.before + "Restarting Fish"
             self._start_fish()
             self.process_output(output)
 
@@ -262,7 +262,7 @@ class FishKernel(Kernel):
 
         try:
             exitcode = int(
-                self.fishwrapper.run_command("{ echo $?; } 2>/dev/null")
+                self.fish_wrapper.run_command("{ echo $?; } 2>/dev/null")
                 .rstrip()
                 .split("\r\n")[0]
             )
@@ -308,17 +308,17 @@ class FishKernel(Kernel):
             cmd = (
                 "compgen -A arrayvar -A export -A variable %s" % token[1:]
             )  # strip leading $
-            output = self.fishwrapper.run_command(cmd).rstrip()
+            output = self.fish_wrapper.run_command(cmd).rstrip()
             completions = set(output.split())
             # append matches including leading $
             matches.extend(["$" + c for c in completions])
         else:
             # complete path
             cmd = "compgen -d -S / %s" % token
-            output = self.fishwrapper.run_command(cmd).rstrip()
+            output = self.fish_wrapper.run_command(cmd).rstrip()
             dirs = list(set(output.split()))
             cmd = "compgen -f %s" % token
-            output = self.fishwrapper.run_command(cmd).rstrip()
+            output = self.fish_wrapper.run_command(cmd).rstrip()
             filesanddirs = list(set(output.split()))
             files = [x for x in filesanddirs if x + "/" not in dirs]
             if "/" not in token:
@@ -330,14 +330,14 @@ class FishKernel(Kernel):
         if "/" not in token and code[-1] != '"':
             # complete anything command-like (avoid annoying errors where command names get completed after a directory)
             cmd = "compgen -abc -A function %s" % token
-            output = self.fishwrapper.run_command(cmd).rstrip()
+            output = self.fish_wrapper.run_command(cmd).rstrip()
             matches.extend(list(set(output.split())))
         if code[-1] == '"':
             # complete variables
             cmd = (
                 "compgen -A arrayvar -A export -A variable %s" % token[1:]
             )  # strip leading $
-            output = self.fishwrapper.run_command(cmd).rstrip()
+            output = self.fish_wrapper.run_command(cmd).rstrip()
             completions = set(output.split())
             # append matches including leading $
             matches.extend(["$" + c for c in completions])
