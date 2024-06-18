@@ -15,7 +15,7 @@ from . import __version__
 version_pat = re.compile(r"version (\d+(\.\d+)+)")
 
 
-class IREPLWrapper(replwrap.REPLWrapper):
+class _IREPLWrapper(replwrap.REPLWrapper):
     """A subclass of REPLWrapper that gives incremental output
     specifically for fish_kernel.
 
@@ -154,8 +154,8 @@ class FishKernel(Kernel):
             ps1 = self.unique_prompt + "\[\]" + ">"
             ps2 = self.unique_prompt + "\[\]" + "+"
             prompt_change = "PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
-            # Using IREPLWrapper to get incremental output
-            self.fish_wrapper = IREPLWrapper(
+            # Using _IREPLWrapper to get incremental output
+            self.fish_wrapper = _IREPLWrapper(
                 child,
                 "\$",
                 prompt_change,
