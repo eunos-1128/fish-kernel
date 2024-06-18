@@ -1,2 +1,3 @@
-def hello() -> str:
-    return "Hello from fish-kernel!"
+"""Fish kernel for Jupyter"""
+
+from .kernel import __version__
