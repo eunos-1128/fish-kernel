@@ -1,2 +1,1 @@
-# fish_kernel
-A fish kernel for IPython
+# Fish Kernel for Jupyter
