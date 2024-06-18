@@ -1,0 +1,9 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "fish_kernel"
+authors = [{name = "UENO, M.", email = "eunosium-1128@live.jp"}]
+readme = "README.md"
+dynamic = ["version", "description"]
