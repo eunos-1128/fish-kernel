@@ -8,11 +8,9 @@ from subprocess import check_output
 import pexpect
 from ipykernel.kernelbase import Kernel
 from pexpect import EOF, replwrap
+from . import __version__
 
 # from .display import extract_contents, build_cmds
-
-
-__version__ = "0.0.1"
 
 version_pat = re.compile(r"version (\d+(\.\d+)+)")
 

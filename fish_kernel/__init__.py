@@ -1,3 +1,5 @@
 """Fish kernel for Jupyter"""
 
-from .kernel import __version__
+from .kernel import VERSION
+
+__version__ = "0.0.1"
