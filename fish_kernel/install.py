@@ -1,15 +1,14 @@
 """"""
 
+import argparse
 import json
 import os
 import sys
-import argparse
-import pathlib
-import shutil
 from typing import Any, Optional
 
-from jupyter_client.kernelspec import KernelSpecManager
 from IPython.utils.tempdir import TemporaryDirectory
+from jupyter_client.kernelspec import KernelSpecManager
+
 # from .resources import _ICON_PATH
 
 kernel_json = {

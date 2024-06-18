@@ -1,14 +1,13 @@
+import os.path
+import random
 import re
 import signal
-from subprocess import check_output
-import os.path
-import uuid
-import random
 import string
+from subprocess import check_output
 
-from ipykernel.kernelbase import Kernel
-from pexpect import replwrap, EOF
 import pexpect
+from ipykernel.kernelbase import Kernel
+from pexpect import EOF, replwrap
 
 # from .display import extract_contents, build_cmds
 
@@ -266,7 +265,7 @@ class FishKernel(Kernel):
                 .rstrip()
                 .split("\r\n")[0]
             )
-        except Exception as exc:
+        except Exception:
             exitcode = 1
 
         if exitcode:
