@@ -21,7 +21,7 @@ managed = true
 dev-dependencies = []
 
 [tool.hatch.version]
-path = "fish_kernel/__init__py"
+path = "fish_kernel/__init__.py"
 
 [tool.hatch.metadata]
 allow-direct-references = true
