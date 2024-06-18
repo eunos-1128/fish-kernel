@@ -1,7 +1,7 @@
 [project]
 name = "fish-kernel"
 version = "0.1.0"
-description = "Add your description here"
+description = "Fish kernel for Jupyter"
 authors = [
     { name = "UENO, M.", email = "eunosium-1128@live.jp" }
 ]
