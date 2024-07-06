@@ -10,7 +10,7 @@ from ipykernel.kernelbase import Kernel
 from pexpect import EOF, replwrap
 from . import __version__
 
-# from .display import extract_contents, build_cmds
+from .display import extract_contents, build_cmds
 
 version_pat = re.compile(r"version (\d+(\.\d+)+)")
 
