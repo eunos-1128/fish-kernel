@@ -11,7 +11,7 @@ end
 
 # Reset fish_prompt so pexpect can find it
 function fish_prompt
-    echo "~> "
+    echo "~>"
 end
 
 # Unset fish_right_prompt, so that it can't change fish_prompt to something unexpected.
