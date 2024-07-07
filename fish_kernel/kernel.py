@@ -1,4 +1,5 @@
-import os.path
+import os
+import pathlib
 import random
 import re
 import signal
@@ -12,7 +13,7 @@ from . import __version__
 
 from .display import extract_contents, build_cmds
 
-version_pat = re.compile(r"version (\d+(\.\d+)+)")
+version_pat = re.compile(r'version (\d+(\.\d+)+)')
 
 
 class _IREPLWrapper(replwrap.REPLWrapper):
@@ -112,66 +113,58 @@ class FishKernel(Kernel):
         "name": "fish",
         "codemirror_mode": "shell",
         "mimetype": "text/x-sh",
-        "file_extension": ".sh",
+        "file_extension": ".fish",
     }
 
     def __init__(self, **kwargs):
         # Make a random prompt, further reducing chances of accidental matches.
         rand = "".join(random.choices(string.ascii_uppercase, k=12))
         self.unique_prompt = "PROMPT_" + rand
+        self.unique_prompt = "~> "
         Kernel.__init__(self, **kwargs)
         self._start_fish()
         self._known_display_ids = set()
 
     def _start_fish(self):
-        # Signal handlers are inherited by forked processes, and we can't easily
-        # reset it from the subprocess. Since kernelapp ignores SIGINT except in
-        # message handlers, we need to temporarily reset the SIGINT handler here
-        # so that fish and its children are interruptible.
         old_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_DFL)
-        # We need to temporarily reset the default signal handler for SIGPIPE so
-        # that commands like `head` used in a pipe chain can signal to the data
-        # producers.
         old_sigpipe_handler = signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         try:
-            # Note: the next few lines mirror functionality in the
-            # fish() function of pexpect/replwrap.py.  Look at the
-            # source code there for comments and context for
-            # understanding the code here.
-            fishrc = os.path.join(os.path.dirname(pexpect.__file__), "fishrc.sh")
             child = pexpect.spawn(
                 "fish",
-                ["--rcfile", fishrc],
+                [
+                    "--init-command",
+                    f"source {os.path.dirname(__file__)}/init_config.fish",
+                ],
                 echo=False,
                 encoding="utf-8",
                 codec_errors="replace",
             )
-            # Following comment stolen from upstream's REPLWrap:
-            # If the user runs 'env', the value of PS1 will be in the output. To avoid
-            # replwrap seeing that as the next prompt, we'll embed the marker characters
-            # for invisible characters in the prompt; these show up when inspecting the
-            # environment variable, but not when fish displays the prompt.
-            ps1 = self.unique_prompt + "\[\]" + ">"
-            ps2 = self.unique_prompt + "\[\]" + "+"
-            prompt_change = "PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
-            # Using _IREPLWrapper to get incremental output
+
+            invisible_chars = '\x1b[00m'
+            ps1 = f"{self.unique_prompt}{invisible_chars}> "
+            ps2 = f"{self.unique_prompt}{invisible_chars}+ "
+
+            # Fishでプロンプトを設定するコマンドを作成
+            prompt_change = f"function fish_prompt; echo -n '{ps1}'; end; function fish_right_prompt; end; function fish_mode_prompt; end"
+
             self.fish_wrapper = _IREPLWrapper(
                 child,
-                "\$",
+                u'~> ',
                 prompt_change,
                 self.unique_prompt,
-                extra_init_cmd="export PAGER=cat",
+                extra_init_cmd="set -x PAGER cat",
                 line_output_callback=self.process_output,
             )
         finally:
             signal.signal(signal.SIGINT, old_sigint_handler)
             signal.signal(signal.SIGPIPE, old_sigpipe_handler)
 
-        # Disable bracketed paste (see <https://github.com/eunos-1128/fish-kernel/issues/117>)
+        # ブラケットペーストの無効化（Fishの構文に合わせて修正）
         self.fish_wrapper.run_command(
-            "bind 'set enable-bracketed-paste off' >/dev/null 2>&1 || true"
+            "bind --preset -e enable-bracketed-paste 2>/dev/null; or true"
         )
-        # Register Fish function to write image data to temporary file
+
+        # 画像データを一時ファイルに書き込むFish関数の登録
         self.fish_wrapper.run_command(build_cmds())
 
     def process_output(self, output):
@@ -214,7 +207,12 @@ class FishKernel(Kernel):
         self.send_response(self.iopub_socket, msg_type, content)
 
     def do_execute(
-        self, code, silent, store_history=True, user_expressions=None, allow_stdin=False
+        self,
+        code,
+        silent,
+        store_history=True,
+        user_expressions=None,
+        allow_stdin=False
     ):
         self.silent = silent
         if not code.strip():

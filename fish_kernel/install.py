@@ -3,6 +3,8 @@
 import argparse
 import json
 import os
+import pathlib
+import shutil
 import sys
 from typing import Any, Optional
 
@@ -12,7 +14,7 @@ from jupyter_client.kernelspec import KernelSpecManager
 from .resources import _ICON_PATH
 
 kernel_json = {
-    "argv": [sys.executable, "-m", "fish-kernel", "-f", "{connection_file}"],
+    "argv": [sys.executable, "-m", "fish_kernel", "-f", "{connection_file}"],
     "display_name": "Fish",
     "language": "fish",
     "codemirror_mode": "shell",
