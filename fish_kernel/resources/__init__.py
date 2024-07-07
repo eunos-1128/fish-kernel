@@ -1,3 +1,6 @@
+import glob
 import pathlib
 
-_ICON_PATH = pathlib.Path(__file__).resolve().parent / "logo.png"
+ICON_PATHS = glob.glob(
+    f"{pathlib.Path(__file__).resolve().parent}/logo-*.png"
+)
