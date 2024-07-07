@@ -47,8 +47,16 @@ class _IREPLWrapper(replwrap.REPLWrapper):
         # probably no, as we never see individual commands but rather cells
         # with possibly many commands, and would need to update this half-way
         # through a cell.
-        self.ps1_re = r"(\(\w+\) )?" + re.escape(self.unique_prompt + ">")
-        self.ps2_re = re.escape(self.unique_prompt + "+")
+
+        # conda/mambaの環境名キャッチのための正規表現は維持します。
+        # Fishのデフォルトプロンプトは通常 '> ' ですが、ユニークなプロンプトを使用します。
+        self.ps1_re = r"(\(\w+\) )?" + re.escape(f"{self.unique_prompt}> ")
+
+        # Fishには直接的なPS2（続行プロンプト）はありませんが、
+        # 多くの場合、続行プロンプトは '> ' のままか、カスタム設定されています。
+        # ここでは、PS1と同じプロンプトを使用しますが、必要に応じて調整できます。
+        self.ps2_re = re.escape(f"{self.unique_prompt}> ")
+
         replwrap.REPLWrapper.__init__(
             self,
             cmd_or_spawn,
@@ -120,7 +128,7 @@ class FishKernel(Kernel):
         # Make a random prompt, further reducing chances of accidental matches.
         rand = "".join(random.choices(string.ascii_uppercase, k=12))
         self.unique_prompt = "PROMPT_" + rand
-        self.unique_prompt = "~> "
+        # self.unique_prompt = "~> "
         Kernel.__init__(self, **kwargs)
         self._start_fish()
         self._known_display_ids = set()
@@ -140,16 +148,18 @@ class FishKernel(Kernel):
                 codec_errors="replace",
             )
 
-            invisible_chars = '\x1b[00m'
-            ps1 = f"{self.unique_prompt}{invisible_chars}> "
-            ps2 = f"{self.unique_prompt}{invisible_chars}+ "
-
-            # Fishでプロンプトを設定するコマンドを作成
-            prompt_change = f"function fish_prompt; echo -n '{ps1}'; end; function fish_right_prompt; end; function fish_mode_prompt; end"
+            # Following comment stolen from upstream's REPLWrap:
+            # If the user runs 'env', the value of PS1 will be in the output. To avoid
+            # replwrap seeing that as the next prompt, we'll embed the marker characters
+            # for invisible characters in the prompt; these show up when inspecting the
+            # environment variable, but not when bash displays the prompt.
+            ps1 = self.unique_prompt + u'\[\]' + ">"
+            ps2 = self.unique_prompt + u'\[\]' + "+"
+            prompt_change = u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
 
             self.fish_wrapper = _IREPLWrapper(
                 child,
-                u'~> ',
+                r'~> ',
                 prompt_change,
                 self.unique_prompt,
                 extra_init_cmd="set -x PAGER cat",
