@@ -18,7 +18,9 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = []
+
+[tool.rye.dev-dependencies]
+"." = {path = ".", develop = true}
 
 [tool.hatch.version]
 path = "fish_kernel/__init__.py"
