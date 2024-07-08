@@ -11,7 +11,7 @@ from typing import Any, Optional
 from IPython.utils.tempdir import TemporaryDirectory
 from jupyter_client.kernelspec import KernelSpecManager
 
-from .resources import ICON_PATHS
+from .resources import LOGO_PATH
 
 kernel_json = {
     "argv": [sys.executable, "-m", "fish_kernel", "-f", "{connection_file}"],
@@ -27,11 +27,12 @@ def install_my_kernel_spec(user: bool = True, prefix: str = None):
         os.chmod(td, 0o755)  # Starts off as 700, not user readable
         with open(os.path.join(td, "kernel.json"), "w") as f:
             json.dump(kernel_json, f, sort_keys=True)
-        for icon_path in ICON_PATHS:
-            shutil.copyfile(
-                icon_path,
-                pathlib.Path(td) / os.path.basename(icon_path)
-            )
+
+        shutil.copyfile(
+            LOGO_PATH,
+            pathlib.Path(td) / LOGO_PATH.name
+        )
+
         print("Installing IPython kernel spec")
         KernelSpecManager().install_kernel_spec(td, "fish", user=user, prefix=prefix)
 
