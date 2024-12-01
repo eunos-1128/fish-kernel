@@ -2,102 +2,137 @@ import os
 import pathlib
 import random
 import re
+import shlex
 import signal
 import string
+import tempfile
 from subprocess import check_output
 
 import pexpect
 from ipykernel.kernelbase import Kernel
-from pexpect import EOF, replwrap
+from pexpect import EOF
+
 from . import __version__
+from .display import build_cmds, extract_contents, split_lines
 
-from .display import extract_contents, build_cmds
+version_pat = re.compile(r"version (\d+(\.\d+)+)")
+_ANSI_ESCAPE_RE = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+_OSC_ESCAPE_RE = re.compile(r"\x1B\][^\x07\x1B]*(?:\x07|\x1B\\)")
+_DCS_ESCAPE_RE = re.compile(r"\x1BP.*?\x1B\\", re.DOTALL)
 
-version_pat = re.compile(r'version (\d+(\.\d+)+)')
+
+def _strip_control_sequences(text):
+    text = _OSC_ESCAPE_RE.sub("", text)
+    text = _DCS_ESCAPE_RE.sub("", text)
+    text = _ANSI_ESCAPE_RE.sub("", text)
+    # Fallback for non-standard two-byte escape sequences.
+    return re.sub(r"\x1B.", "", text)
 
 
-class _IREPLWrapper(replwrap.REPLWrapper):
-    """A subclass of REPLWrapper that gives incremental output
-    specifically for fish_kernel.
+class _FishSession:
+    """Persistent fish process that executes commands via temporary sourced files."""
 
-    The parameters are the same as for REPLWrapper, except for one
-    extra parameter:
-
-    :param line_output_callback: a callback method to receive each batch
-      of incremental output. It takes one string parameter.
-    """
-
-    def __init__(
-        self,
-        cmd_or_spawn,
-        orig_prompt,
-        prompt_change,
-        unique_prompt,
-        extra_init_cmd=None,
-        line_output_callback=None,
-    ):
-        self.unique_prompt = unique_prompt
-        self.line_output_callback = line_output_callback
-        # The extra regex at the start of PS1 below is designed to catch the
-        # `(envname) ` which conda/mamba add to the start of PS1 by default.
-        # Obviously anything else that looks like this, including user output,
-        # will be eaten.
-        # FIXME: work out if there is a way to update these by reading PS1
-        # after each command and checking that it has changed. The answer is
-        # probably no, as we never see individual commands but rather cells
-        # with possibly many commands, and would need to update this half-way
-        # through a cell.
-
-        # conda/mambaの環境名キャッチのための正規表現は維持します。
-        # Fishのデフォルトプロンプトは通常 '> ' ですが、ユニークなプロンプトを使用します。
-        self.ps1_re = r"(\(\w+\) )?" + re.escape(f"{self.unique_prompt}> ")
-
-        # Fishには直接的なPS2（続行プロンプト）はありませんが、
-        # 多くの場合、続行プロンプトは '> ' のままか、カスタム設定されています。
-        # ここでは、PS1と同じプロンプトを使用しますが、必要に応じて調整できます。
-        self.ps2_re = re.escape(f"{self.unique_prompt}> ")
-
-        replwrap.REPLWrapper.__init__(
-            self,
-            cmd_or_spawn,
-            orig_prompt,
-            prompt_change,
-            new_prompt=self.ps1_re,
-            continuation_prompt=self.ps2_re,
-            extra_init_cmd=extra_init_cmd,
+    def __init__(self, prompt_prefix):
+        fish_env = os.environ.copy()
+        fish_env["FISH_KERNEL_PROMPT"] = prompt_prefix
+        init_script = pathlib.Path(__file__).with_name("init_config.fish")
+        source_init_cmd = f"source {shlex.quote(str(init_script))}"
+        self.child = pexpect.spawn(
+            "fish",
+            [
+                "--no-config",
+                "--features",
+                "no-mark-prompt,no-query-term",
+                "--interactive",
+                "--init-command",
+                source_init_cmd,
+            ],
+            echo=False,
+            env=fish_env,
+            encoding="utf-8",
+            codec_errors="replace",
         )
+        self.prompt_prefix = prompt_prefix
 
-    def _expect_prompt(self, timeout=-1):
-        prompts = [self.ps1_re, self.ps2_re]
+        self.run_command("set -gx PAGER cat", timeout=10)
+        self.run_command(build_cmds(), timeout=10)
 
-        if timeout == None:
-            # "None" means we are executing code from a Jupyter cell by way of the run_command
-            # in the do_execute() code below, so do incremental output, i.e.
-            # also look for end of line or carridge return
-            prompts.extend(["\r?\n", "\r"])
-            while True:
-                pos = self.child.expect_list(
-                    [re.compile(x) for x in prompts], timeout=None
-                )
-                if pos == 2:
-                    # End of line received.
-                    self.line_output_callback(self.child.before + "\n")
-                elif pos == 3:
-                    # Carriage return ('\r') received.
-                    self.line_output_callback(self.child.before + "\r")
-                else:
-                    if len(self.child.before) != 0:
-                        # Prompt received, but partial line precedes it.
-                        self.line_output_callback(self.child.before)
-                    break
-        else:
-            # Otherwise, wait (with timeout) until the next prompt
-            pos = self.child.expect_list(
-                [re.compile(x) for x in prompts], timeout=timeout
-            )
+    def close(self):
+        if self.child.isalive():
+            self.child.terminate(force=True)
 
-        # Prompt received, so return normally
-        return pos
+    def _write_temp_script(self, command, prefix):
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".fish", prefix=prefix, delete=False
+        ) as tmp:
+            temp_path = pathlib.Path(tmp.name)
+            tmp.write(command)
+            if not command.endswith("\n"):
+                tmp.write("\n")
+        return temp_path
+
+    def _wrap_source_command(self, source_cmd):
+        rand = "".join(random.choices(string.ascii_uppercase + string.digits, k=12))
+        status_tag = f"__FISH_KERNEL_STATUS_{rand}__"
+        done_tag = f"__FISH_KERNEL_DONE_{rand}__"
+
+        wrapped_script = (
+            f"{source_cmd}; "
+            f"set -l __fish_kernel_status $status; "
+            f"printf '%s%s\\n' '{status_tag}' $__fish_kernel_status; "
+            f"printf '%s\\n' '{done_tag}'"
+        )
+        return wrapped_script, status_tag, done_tag
+
+    def _parse_output(self, raw_output, status_tag, noise_tokens):
+        output_lines = []
+        status = 1
+
+        cleaned = _strip_control_sequences(raw_output)
+        for line in split_lines(cleaned):
+            line_no_ending = line.rstrip("\r\n")
+            compact = line_no_ending.strip()
+            if line_no_ending.startswith(status_tag):
+                status_text = line_no_ending[len(status_tag) :].strip()
+                if re.fullmatch(r"-?\d+", status_text):
+                    status = int(status_text)
+                continue
+            if compact.startswith(self.prompt_prefix.strip()):
+                continue
+            if compact in {"source", "⏎"}:
+                continue
+            if compact.replace(" ", "") == "⏎":
+                continue
+            if any(token in compact for token in noise_tokens):
+                continue
+            output_lines.append(line)
+
+        while output_lines and output_lines[0].strip() == "":
+            output_lines.pop(0)
+
+        return "".join(output_lines).replace("\r", ""), status
+
+    def run_command(self, command, timeout=-1):
+        if command is None:
+            raise ValueError("No command was given")
+
+        command_path = self._write_temp_script(command, prefix="fish_kernel_cmd_")
+        command_source_cmd = f"source {shlex.quote(str(command_path))}"
+        wrapped_script, status_tag, done_tag = self._wrap_source_command(command_source_cmd)
+        wrapper_path = self._write_temp_script(wrapped_script, prefix="fish_kernel_wrap_")
+        wrapper_source_cmd = f"source {shlex.quote(str(wrapper_path))}"
+        noise_tokens = {str(command_path), str(wrapper_path), "fish_kernel_wrap_", "fish_kernel_cmd_"}
+
+        try:
+            self.child.sendline(wrapper_source_cmd)
+            expect_timeout = self.child.timeout if timeout == -1 else timeout
+            self.child.expect(re.escape(done_tag), timeout=expect_timeout)
+            raw_output = self.child.before
+        finally:
+            wrapper_path.unlink(missing_ok=True)
+            command_path.unlink(missing_ok=True)
+
+        return self._parse_output(raw_output, status_tag, noise_tokens)
 
 
 class FishKernel(Kernel):
@@ -125,89 +160,40 @@ class FishKernel(Kernel):
     }
 
     def __init__(self, **kwargs):
-        # Make a random prompt, further reducing chances of accidental matches.
-        rand = "".join(random.choices(string.ascii_uppercase, k=12))
-        self.unique_prompt = "PROMPT_" + rand
-        # self.unique_prompt = "~> "
         Kernel.__init__(self, **kwargs)
-        self._start_fish()
         self._known_display_ids = set()
+        rand = "".join(random.choices(string.ascii_uppercase + string.digits, k=12))
+        self.prompt_prefix = f"__FISH_KERNEL_{rand}__> "
+        self._start_fish()
 
     def _start_fish(self):
         old_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_DFL)
         old_sigpipe_handler = signal.signal(signal.SIGPIPE, signal.SIG_DFL)
         try:
-            child = pexpect.spawn(
-                "fish",
-                [
-                    "--init-command",
-                    f"source {os.path.dirname(__file__)}/init_config.fish",
-                ],
-                echo=False,
-                encoding="utf-8",
-                codec_errors="replace",
-            )
-
-            # Following comment stolen from upstream's REPLWrap:
-            # If the user runs 'env', the value of PS1 will be in the output. To avoid
-            # replwrap seeing that as the next prompt, we'll embed the marker characters
-            # for invisible characters in the prompt; these show up when inspecting the
-            # environment variable, but not when bash displays the prompt.
-            ps1 = self.unique_prompt + u'\[\]' + ">"
-            ps2 = self.unique_prompt + u'\[\]' + "+"
-            prompt_change = u"PS1='{0}' PS2='{1}' PROMPT_COMMAND=''".format(ps1, ps2)
-
-            self.fish_wrapper = _IREPLWrapper(
-                child,
-                r'~> ',
-                prompt_change,
-                self.unique_prompt,
-                extra_init_cmd="set -x PAGER cat",
-                line_output_callback=self.process_output,
-            )
+            self.fish_session = _FishSession(self.prompt_prefix)
         finally:
             signal.signal(signal.SIGINT, old_sigint_handler)
             signal.signal(signal.SIGPIPE, old_sigpipe_handler)
-
-        # ブラケットペーストの無効化（Fishの構文に合わせて修正）
-        self.fish_wrapper.run_command(
-            "bind --preset -e enable-bracketed-paste 2>/dev/null; or true"
-        )
-
-        # 画像データを一時ファイルに書き込むFish関数の登録
-        self.fish_wrapper.run_command(build_cmds())
 
     def process_output(self, output):
         if not self.silent:
             plain_output, rich_contents = extract_contents(output)
 
-            # Send standard output
             if plain_output:
                 stream_content = {"name": "stdout", "text": plain_output}
                 self.send_response(self.iopub_socket, "stream", stream_content)
 
-            # Send rich contents, if any:
             for content in rich_contents:
                 if isinstance(content, Exception):
-                    message = {"name": "stderr", "text": str(e)}
+                    message = {"name": "stderr", "text": str(content)}
                     self.send_response(self.iopub_socket, "stream", message)
+                elif "transient" in content and "display_id" in content["transient"]:
+                    self._send_content_to_display_id(content)
                 else:
-                    if "transient" in content and "display_id" in content["transient"]:
-                        self._send_content_to_display_id(content)
-                    else:
-                        self.send_response(self.iopub_socket, "display_data", content)
+                    self.send_response(self.iopub_socket, "display_data", content)
 
     def _send_content_to_display_id(self, content):
-        """If display_id is not known, use "display_data", otherwise "update_display_data"."""
-        # Notice this is imperfect, because when re-running the same cell, the output cell
-        # is destroyed and the div element (the html tag) with the display_id no longer exists. But the
-        # `update_display_data` function has no way of knowing this, and thinks that the
-        # display_id still exists and will try, and fail to update it (as opposed to re-create
-        # the div with the display_id).
-        #
-        # The solution is to have the user always to generate a new display_id for a cell: this
-        # way `update_display_data` will not have seen the display_id when the cell is re-run and
-        # correctly creates the new div element.
+        """If display_id is unknown, use display_data; otherwise update_display_data."""
         display_id = content["transient"]["display_id"]
         if display_id in self._known_display_ids:
             msg_type = "update_display_data"
@@ -222,7 +208,7 @@ class FishKernel(Kernel):
         silent,
         store_history=True,
         user_expressions=None,
-        allow_stdin=False
+        allow_stdin=False,
     ):
         self.silent = silent
         if not code.strip():
@@ -245,34 +231,22 @@ class FishKernel(Kernel):
             return error_content
 
         interrupted = False
+        output = ""
+        exitcode = 1
         try:
-            # Note: timeout=None tells IREPLWrapper to do incremental
-            # output.  Also note that the return value from
-            # run_command is not needed, because the output was
-            # already sent by IREPLWrapper.
-            self.fish_wrapper.run_command(code.rstrip(), timeout=None)
+            output, exitcode = self.fish_session.run_command(code, timeout=None)
         except KeyboardInterrupt:
-            self.fish_wrapper.child.sendintr()
+            self.fish_session.child.sendintr()
             interrupted = True
-            self.fish_wrapper._expect_prompt()
-            output = self.fish_wrapper.child.before
-            self.process_output(output)
         except EOF:
-            output = self.fish_wrapper.child.before + "Restarting Fish"
+            output = "Restarting Fish\n"
             self._start_fish()
+
+        if output:
             self.process_output(output)
 
         if interrupted:
             return {"status": "abort", "execution_count": self.execution_count}
-
-        try:
-            exitcode = int(
-                self.fish_wrapper.run_command("{ echo $?; } 2>/dev/null")
-                .rstrip()
-                .split("\r\n")[0]
-            )
-        except Exception:
-            exitcode = 1
 
         if exitcode:
             error_content = {"ename": "", "evalue": str(exitcode), "traceback": []}
@@ -281,13 +255,13 @@ class FishKernel(Kernel):
             error_content["execution_count"] = self.execution_count
             error_content["status"] = "error"
             return error_content
-        else:
-            return {
-                "status": "ok",
-                "execution_count": self.execution_count,
-                "payload": [],
-                "user_expressions": {},
-            }
+
+        return {
+            "status": "ok",
+            "execution_count": self.execution_count,
+            "payload": [],
+            "user_expressions": {},
+        }
 
     def do_complete(self, code, cursor_pos):
         code = code[:cursor_pos]
@@ -295,66 +269,36 @@ class FishKernel(Kernel):
             "matches": [],
             "cursor_start": 0,
             "cursor_end": cursor_pos,
-            "metadata": dict(),
+            "metadata": {},
             "status": "ok",
         }
 
-        matches = []
-        # The regex below might cause issues, but is designed to allow
-        # completion on the rhs of a variable assignment and within strings,
-        # like var="/etc/<tab>", which should complete from /etc/.
-        # Let's just hope no one makes a habit of puting =/"/' into file names
-        # </naievity>  (blame @kdm9 if it breaks)
-        tokens = re.split("[\t \n;=\"'><]+", code)
-        token = tokens[-1]
+        tokens = re.split(r"[\t \n;=\"'><]+", code)
+        token = tokens[-1] if tokens else ""
         start = cursor_pos - len(token)
-        if token and token[0] == "$":
-            # complete variables
-            cmd = (
-                "compgen -A arrayvar -A export -A variable %s" % token[1:]
-            )  # strip leading $
-            output = self.fish_wrapper.run_command(cmd).rstrip()
-            completions = set(output.split())
-            # append matches including leading $
-            matches.extend(["$" + c for c in completions])
-        else:
-            # complete path
-            cmd = "compgen -d -S / %s" % token
-            output = self.fish_wrapper.run_command(cmd).rstrip()
-            dirs = list(set(output.split()))
-            cmd = "compgen -f %s" % token
-            output = self.fish_wrapper.run_command(cmd).rstrip()
-            filesanddirs = list(set(output.split()))
-            files = [x for x in filesanddirs if x + "/" not in dirs]
-            if "/" not in token:
-                # Add an explict ./ for relative paths
-                matches.extend(["./" + x for x in files + dirs])
-            else:
-                matches.extend(files)
-                matches.extend(dirs)
-        if "/" not in token and code[-1] != '"':
-            # complete anything command-like (avoid annoying errors where command names get completed after a directory)
-            cmd = "compgen -abc -A function %s" % token
-            output = self.fish_wrapper.run_command(cmd).rstrip()
-            matches.extend(list(set(output.split())))
-        if code[-1] == '"':
-            # complete variables
-            cmd = (
-                "compgen -A arrayvar -A export -A variable %s" % token[1:]
-            )  # strip leading $
-            output = self.fish_wrapper.run_command(cmd).rstrip()
-            completions = set(output.split())
-            # append matches including leading $
-            matches.extend(["$" + c for c in completions])
+
+        completion_cmd = "complete --do-complete {} 2>/dev/null".format(shlex.quote(code))
+        try:
+            output, _ = self.fish_session.run_command(completion_cmd, timeout=10)
+        except Exception:
+            return default
+
+        matches = []
+        for line in output.splitlines():
+            candidate = line.split("\t", 1)[0].strip()
+            if candidate:
+                matches.append(candidate)
+
+        if token:
+            matches = [m for m in matches if m.startswith(token)]
 
         if not matches:
             return default
-        matches = [m for m in matches if m.startswith(token)]
 
         return {
-            "matches": sorted(matches),
+            "matches": sorted(set(matches)),
             "cursor_start": start,
             "cursor_end": cursor_pos,
-            "metadata": dict(),
+            "metadata": {},
             "status": "ok",
         }

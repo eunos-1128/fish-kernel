@@ -18,7 +18,6 @@ kernel_json = {
     "display_name": "Fish",
     "language": "fish",
     "codemirror_mode": "shell",
-    "env": {"PS1": "~>"},
 }
 
 

@@ -1,6 +1,6 @@
 """display.py holds the functions needed to display different types of content.
 
-To use specialized content (images, html, etc) this file defines (in `build_cmds()`) bash functions
+To use specialized content (images, html, etc) this file defines (in `build_cmds()`) shell functions
 that take the contents as standard input. Currently, `display` (images), `displayHTML` (html)
 and `displayJS` (javascript) are supported.
 
@@ -8,7 +8,7 @@ Example:
 
 $ cat dog.png | display
 $ echo "<b>Dog</b>, not a cat." | displayHTML
-$ echo "alert('It is known khaleesi\!');" | displayJS
+$ echo "alert('It is known khaleesi\\!');" | displayJS
 
 ### Updating rich content cells
 
@@ -45,7 +45,7 @@ To output to a particular "display_id", to allow update of content, prefix the f
 with "(<display_id>)". E.g: a line to display the contents of /tmp/myHTML.html to
 a display id "id_12345" would look like:
 
-bash_kernel: saved html data to: (id_12345) /tmp/myHTML.html
+fish_kernel: saved html data to: (id_12345) /tmp/myHTML.html
 
 To add support to new content types: (1) create a constant _TEXT_SAVED_<new_type>; (2) create a function
 display_data_for_<new_type>; (3) Create an entry in CONTENT_DATA_PREFIXES. Btw, `$ jupyter-lab --Session.debug=True`
@@ -53,29 +53,37 @@ is your friend to debug the format of the content message.
 """
 import base64
 import imghdr
-import json
 import os
 import re
 
 
-_TEXT_SAVED_IMAGE = "bash_kernel: saved image data to: "
-_TEXT_SAVED_HTML = "bash_kernel: saved html data to: "
-_TEXT_SAVED_JAVASCRIPT = "bash_kernel: saved javascript data to: "
+_TEXT_SAVED_IMAGE = "fish_kernel: saved image data to: "
+_TEXT_SAVED_HTML = "fish_kernel: saved html data to: "
+_TEXT_SAVED_JAVASCRIPT = "fish_kernel: saved javascript data to: "
 
 def _build_cmd_for_type(display_cmd, line_prefix):
     return """
-%s () {
-    display_id="$1"; shift;
-    TMPFILE=$(mktemp ${TMPDIR-/tmp}/bash_kernel.XXXXXXXXXX)
-    cat > $TMPFILE
-    prefix="%s"
-    if [[ "${display_id}" != "" ]]; then
-        echo "${prefix}(${display_id}) $TMPFILE" >&2
+function {display_cmd}
+    set -l display_id ""
+    if set -q argv[1]
+        set display_id $argv[1]
+    end
+
+    set -l tmp_dir "/tmp"
+    if set -q TMPDIR
+        set tmp_dir $TMPDIR
+    end
+
+    set -l tmp_file (mktemp "$tmp_dir/fish_kernel.XXXXXXXXXX")
+    cat > "$tmp_file"
+
+    if test -n "$display_id"
+        echo "{line_prefix}($display_id) $tmp_file" >&2
     else
-        echo "${prefix}$TMPFILE" >&2
-    fi
-}
-""" % (display_cmd, line_prefix)
+        echo "{line_prefix}$tmp_file" >&2
+    end
+end
+""".format(display_cmd=display_cmd, line_prefix=line_prefix)
 
 
 def build_cmds():
@@ -84,7 +92,14 @@ def build_cmds():
     for line_prefix, info in CONTENT_DATA_PREFIXES.items():
         commands.append(_build_cmd_for_type(info['display_cmd'], line_prefix))
         capabilities.append(info['capability'])
-    capabilities_cmd = 'export NOTEBOOK_BASH_KERNEL_CAPABILITIES="{}"'.format(','.join(capabilities))
+    capabilities_value = ",".join(capabilities)
+    capabilities_cmd = "\n".join(
+        [
+            'set -gx NOTEBOOK_FISH_KERNEL_CAPABILITIES "{}"'.format(capabilities_value),
+            # Keep the legacy name for downstream tools expecting bash-kernel env.
+            'set -gx NOTEBOOK_BASH_KERNEL_CAPABILITIES "{}"'.format(capabilities_value),
+        ]
+    )
     commands.append(capabilities_cmd)
     return "\n".join(commands)
 
@@ -93,7 +108,7 @@ def _unlink_if_temporary(filename):
     tmp_dir = '/tmp'
     if 'TMPDIR' in os.environ:
         tmp_dir = os.environ['TMPDIR']
-    if filename.startswith(tmp_dir):
+    if filename.startswith(tmp_dir) and os.path.exists(filename):
         os.unlink(filename)
 
 
@@ -192,7 +207,7 @@ def extract_contents(output):
 
 def _filename_and_display_id(line):
     """line will be either "filename" or "(display_id) filename"."""
-    if line[0] != '(':
+    if not line or line[0] != '(':
         return line, None
     pos = line.find(')')
     if pos == -1:

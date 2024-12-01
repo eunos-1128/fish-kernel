@@ -1,21 +1,17 @@
-# Different platforms have different names for the systemwide fish config
-if test -f /etc/fish/config.fish
-    source /etc/fish/config.fish
-end
-if test -f /usr/local/etc/fish/config.fish
-    source /usr/local/etc/fish/config.fish
-end
-if test -f ~/.config/fish/config.fish
-    source ~/.config/fish/config.fish
+# Keep startup deterministic for pexpect.
+set -g fish_greeting
+
+set -l fish_kernel_prompt "__FISH_KERNEL_PROMPT__> "
+if set -q FISH_KERNEL_PROMPT
+    set fish_kernel_prompt $FISH_KERNEL_PROMPT
 end
 
-# Reset fish_prompt so pexpect can find it
-function fish_prompt
-    echo "~>"
+function fish_prompt --description "fish-kernel startup prompt"
+    printf "%s" "$fish_kernel_prompt"
 end
 
-# Unset fish_right_prompt, so that it can't change fish_prompt to something unexpected.
-functions --erase fish_right_prompt
+function fish_right_prompt --description "Disable right prompt in fish-kernel"
+end
 
-# Disable bracketed paste
-bind --preset -e enable-bracketed-paste 2>/dev/null; or true
+function fish_mode_prompt --description "Disable mode prompt in fish-kernel"
+end
