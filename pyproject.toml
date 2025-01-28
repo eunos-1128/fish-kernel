@@ -4,14 +4,29 @@ description = "Fish kernel for Jupyter"
 authors = [
     { name = "UENO, M.", email = "eunosium-1128@live.jp" }
 ]
+license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+    "filetype>=1.2.0",
     "ipykernel>=6.29.4",
     "jupyter-client>=8.6.2",
     "pexpect>=4.9.0",
 ]
 dynamic = ["version"]
+keywords = ["fish", "jupyter", "kernel", "ipykernel"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Jupyter",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Shells",
+]
 
 [build-system]
 requires = ["hatchling>=1.26.0"]
@@ -22,3 +37,10 @@ path = "fish_kernel/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["fish_kernel"]
+
+[dependency-groups]
+dev = [
+    "jupyterlab>=4.2.0",
+    "pytest>=8.3.0",
+    "ruff>=0.11.0",
+]
