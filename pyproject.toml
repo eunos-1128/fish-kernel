@@ -28,12 +28,28 @@ classifiers = [
     "Topic :: System :: Shells",
 ]
 
+[project.urls]
+Homepage = "https://github.com/eunos-1128/fish-kernel"
+Repository = "https://github.com/eunos-1128/fish-kernel"
+Issues = "https://github.com/eunos-1128/fish-kernel/issues"
+
 [build-system]
 requires = ["hatchling>=1.26.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
 path = "fish_kernel/__init__.py"
+
+[tool.hatch.build]
+ignore-vcs = true
+
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "/fish_kernel",
+    "/README.md",
+    "/LICENSE",
+    "/pyproject.toml",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["fish_kernel"]
