@@ -27,10 +27,7 @@ def install_my_kernel_spec(user: bool = True, prefix: str = None):
         with open(os.path.join(td, "kernel.json"), "w") as f:
             json.dump(kernel_json, f, sort_keys=True)
 
-        shutil.copyfile(
-            LOGO_PATH,
-            pathlib.Path(td) / LOGO_PATH.name
-        )
+        shutil.copyfile(LOGO_PATH, pathlib.Path(td) / LOGO_PATH.name)
 
         print("Installing IPython kernel spec")
         KernelSpecManager().install_kernel_spec(td, "fish", user=user, prefix=prefix)

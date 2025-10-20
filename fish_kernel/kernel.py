@@ -118,10 +118,19 @@ class _FishSession:
 
         command_path = self._write_temp_script(command, prefix="fish_kernel_cmd_")
         command_source_cmd = f"source {shlex.quote(str(command_path))}"
-        wrapped_script, status_tag, done_tag = self._wrap_source_command(command_source_cmd)
-        wrapper_path = self._write_temp_script(wrapped_script, prefix="fish_kernel_wrap_")
+        wrapped_script, status_tag, done_tag = self._wrap_source_command(
+            command_source_cmd
+        )
+        wrapper_path = self._write_temp_script(
+            wrapped_script, prefix="fish_kernel_wrap_"
+        )
         wrapper_source_cmd = f"source {shlex.quote(str(wrapper_path))}"
-        noise_tokens = {str(command_path), str(wrapper_path), "fish_kernel_wrap_", "fish_kernel_cmd_"}
+        noise_tokens = {
+            str(command_path),
+            str(wrapper_path),
+            "fish_kernel_wrap_",
+            "fish_kernel_cmd_",
+        }
 
         try:
             self.child.sendline(wrapper_source_cmd)
@@ -277,7 +286,9 @@ class FishKernel(Kernel):
         token = tokens[-1] if tokens else ""
         start = cursor_pos - len(token)
 
-        completion_cmd = "complete --do-complete {} 2>/dev/null".format(shlex.quote(code))
+        completion_cmd = "complete --do-complete {} 2>/dev/null".format(
+            shlex.quote(code)
+        )
         try:
             output, _ = self.fish_session.run_command(completion_cmd, timeout=10)
         except Exception:
