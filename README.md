@@ -2,9 +2,11 @@
 
 `fish-kernel` is a Jupyter kernel implementation for the fish shell.
 
+
+
 ## Requirements
 
-- Python `>=3.9`
+- Python `>=3.10`
 - `fish` command available on `PATH` (tested with fish `4.7.1`)
 - Jupyter frontend (`jupyterlab` or notebook)
 
@@ -12,27 +14,27 @@
 
 ### From PyPI
 
-```bash
-python -m pip install fish-kernel
+```shell
+pip install fish-kernel
 ```
 
-## Register kernelspec
+### Register kernelspec
 
 Install for your user account:
 
-```bash
+```shell
 python -m fish_kernel.install --user
 ```
 
 Or install into the current Python environment:
 
-```bash
+```shell
 python -m fish_kernel.install --sys-prefix
 ```
 
-## Verify
+### Verify
 
-```bash
+```shell
 jupyter kernelspec list
 ```
 
@@ -40,10 +42,10 @@ You should see a `fish` kernel entry.
 
 ## Development install (source)
 
-```bash
+```shell
 uv venv .venv
 uv pip install --python .venv -e .
-.venv/bin/python -m fish_kernel.install --sys-prefix
+.venv/bin/python -m fish_kernel.install --user
 .venv/bin/jupyter kernelspec list
 ```
 
