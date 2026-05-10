@@ -42,13 +42,15 @@ jupyter kernelspec list
 
 You should see a `fish` kernel entry.
 
-## Development install (source)
+## Development
 
 ```shell
-uv venv .venv
-uv pip install --python .venv -e .
-.venv/bin/fish-kernel install --user
-.venv/bin/jupyter kernelspec list
+git clone https://github.com/eunos-1128/fish-kernel.git
+cd fish-kernel
+uv sync --dev
+uv run pytest
+uv run fish-kernel install --sys-prefix
+uv run jupyter kernelspec list
 ```
 
 ## Usage examples
@@ -61,8 +63,9 @@ set b 13
 math $a + $b
 ```
 
-## Note
+## Acknowledgements
 
-This project was developed with inspiration from
-[`bash_kernel`](https://github.com/takluyver/bash_kernel) and
-[`zsh-jupyter-kernel`](https://github.com/dahn-zk/zsh-jupyter-kernel).
+This project was developed with inspiration from:
+
+- [`bash_kernel`](https://github.com/takluyver/bash_kernel)
+- [`zsh-jupyter-kernel`](https://github.com/dahn-zk/zsh-jupyter-kernel)
