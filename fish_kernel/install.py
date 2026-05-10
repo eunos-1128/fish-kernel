@@ -7,7 +7,7 @@ import pathlib
 import shutil
 import sys
 import tempfile
-from typing import Any, Optional
+from typing import Optional
 
 from jupyter_client.kernelspec import KernelSpecManager
 
@@ -33,16 +33,10 @@ def install_my_kernel_spec(user: bool = True, prefix: str = None):
         KernelSpecManager().install_kernel_spec(td, "fish", user=user, prefix=prefix)
 
 
-def _is_root() -> bool:
-    try:
-        return os.geteuid() == 0
-    except AttributeError:
-        return False  # assume not an admin on non-Unix platforms
-
-
-def main(argv: Optional[list[Any]] = None):
+def main(argv: Optional[list[str]] = None) -> int:
+    args_list = list(argv) if argv is not None else sys.argv[1:]
     parser = argparse.ArgumentParser(description="Install KernelSpec for Fish Kernel")
-    prefix_locations = parser.add_mutually_exclusive_group()
+    prefix_locations = parser.add_mutually_exclusive_group(required=True)
 
     prefix_locations.add_argument(
         "--user",
@@ -59,7 +53,11 @@ def main(argv: Optional[list[Any]] = None):
         "--prefix", help="Install KernelSpec in this prefix", default=None
     )
 
-    args = parser.parse_args(argv)
+    if not args_list:
+        parser.print_help()
+        return 2
+
+    args = parser.parse_args(args_list)
 
     user = False
     prefix = None
@@ -67,11 +65,12 @@ def main(argv: Optional[list[Any]] = None):
         prefix = sys.prefix
     elif args.prefix:
         prefix = args.prefix
-    elif args.user or not _is_root():
+    elif args.user:
         user = True
 
     install_my_kernel_spec(user=user, prefix=prefix)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

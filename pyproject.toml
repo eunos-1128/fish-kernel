@@ -32,6 +32,9 @@ Homepage = "https://github.com/eunos-1128/fish-kernel"
 Repository = "https://github.com/eunos-1128/fish-kernel"
 Issues = "https://github.com/eunos-1128/fish-kernel/issues"
 
+[project.scripts]
+fish-kernel = "fish_kernel.cli:main"
+
 [build-system]
 requires = ["hatchling>=1.26.0"]
 build-backend = "hatchling.build"

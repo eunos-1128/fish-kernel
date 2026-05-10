@@ -23,13 +23,13 @@ pip install fish-kernel
 Install for your user account:
 
 ```shell
-python -m fish_kernel.install --user
+fish-kernel install --user
 ```
 
 Or install into the current Python environment:
 
 ```shell
-python -m fish_kernel.install --sys-prefix
+fish-kernel install --sys-prefix
 ```
 
 ### Verify
@@ -45,7 +45,7 @@ You should see a `fish` kernel entry.
 ```shell
 uv venv .venv
 uv pip install --python .venv -e .
-.venv/bin/python -m fish_kernel.install --user
+.venv/bin/fish-kernel install --user
 .venv/bin/jupyter kernelspec list
 ```
 
