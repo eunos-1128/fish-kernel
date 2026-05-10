@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- Add GitHub Actions workflows for CI and publish ([a415637](https://github.com/eunos-1128/fish-kernel/commit/a4156378913cb09c418a9d672d99781bc25ff303) by UENO, M.).
+- Add README image and SVG logo ([ab4ea36](https://github.com/eunos-1128/fish-kernel/commit/ab4ea36fadd21163aa038c96a79cd91334da791e) by UENO, M.).
+- Add changelog and pre-commit; apply ruff ([18eb679](https://github.com/eunos-1128/fish-kernel/commit/18eb679d42a93b3b461e2f69491ccf00c5347391) by UENO, M.).
 - Add README with installation and usage examples ([201ae8d](https://github.com/eunos-1128/fish-kernel/commit/201ae8d4a3a794fea151c09bfceabdde2c4c68e8) by UENO, M.).
 - Add project URLs and sdist build config ([ad20f39](https://github.com/eunos-1128/fish-kernel/commit/ad20f393b7b392d90609e747e14d3a1e7d70360b) by UENO, M.).
 - Add main.py with greeting entrypoint ([2d1b3a1](https://github.com/eunos-1128/fish-kernel/commit/2d1b3a1f6307c3ab0732ef8c3c4e5423ecafa80f) by UENO, M.).
