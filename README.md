@@ -60,3 +60,9 @@ set a 7
 set b 13
 math $a + $b
 ```
+
+## Note
+
+This project was developed with inspiration from
+[`bash_kernel`](https://github.com/takluyver/bash_kernel) and
+[`zsh-jupyter-kernel`](https://github.com/dahn-zk/zsh-jupyter-kernel).
