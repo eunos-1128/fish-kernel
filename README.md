@@ -20,6 +20,8 @@ pip install fish-kernel
 
 ### Register kernelspec
 
+`fish-kernel install` requires one of `--user`, `--sys-prefix`, or `--prefix`.
+
 Install for your user account:
 
 ```shell
