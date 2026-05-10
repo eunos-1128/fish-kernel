@@ -2,7 +2,7 @@
 
 `fish-kernel` is a Jupyter kernel implementation for the fish shell.
 
-
+![](./README.png)
 
 ## Requirements
 
