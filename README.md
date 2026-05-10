@@ -67,5 +67,5 @@ math $a + $b
 
 This project was developed with inspiration from:
 
-- [`bash_kernel`](https://github.com/takluyver/bash_kernel)
-- [`zsh-jupyter-kernel`](https://github.com/dahn-zk/zsh-jupyter-kernel)
+- [bash_kernel](https://github.com/takluyver/bash_kernel)
+- [zsh-jupyter-kernel](https://github.com/dahn-zk/zsh-jupyter-kernel)
