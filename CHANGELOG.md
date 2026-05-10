@@ -6,12 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
-## [v0.1.0](https://github.com/eunos-1128/fish-kernel/releases/tag/v0.1.0) - 2026-05-10
+## [v0.1.0](https://github.com/eunos-1128/fish-kernel/releases/tag/v0.1.0) - 2026-05-11
 
 <small>[Compare with first commit](https://github.com/eunos-1128/fish-kernel/compare/159b9a55dd7186527636d458badf685185f2f14d...v0.1.0)</small>
 
 ### Added
 
+- Add tests for CLI, install, and text processing ([9f53ede](https://github.com/eunos-1128/fish-kernel/commit/9f53ede83c738a77be601f7ed20567107c9b49a6) by UENO, M.).
+- Add CHANGELOG with v0.1.0 entries ([6e6c4c7](https://github.com/eunos-1128/fish-kernel/commit/6e6c4c74cf01e0f63029f643cc01bc9d08d08f5d) by UENO, M.).
 - Add v0.1.0 release to changelog ([a62c593](https://github.com/eunos-1128/fish-kernel/commit/a62c593b10524c4bdfcdccaa00c210d18545e938) by UENO, M.).
 - Add 0.1.0 release to changelog ([aab7a07](https://github.com/eunos-1128/fish-kernel/commit/aab7a071ec593210f94e8780de348f94575470bc) by UENO, M.).
 - Add CLI changelog entry and README note ([0ff96e4](https://github.com/eunos-1128/fish-kernel/commit/0ff96e4c133a04bb2789f65c8ec773924a776061) by UENO, M.).
