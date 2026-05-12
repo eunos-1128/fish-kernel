@@ -14,7 +14,7 @@ def test_main_version_prints_version(capsys):
     out = capsys.readouterr().out.strip()
 
     assert exit_code == 0
-    assert out == "0.1.0"
+    assert out == cli.__version__
 
 
 def test_main_unknown_command_returns_error(capsys):
