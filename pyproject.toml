@@ -59,11 +59,14 @@ packages = ["fish_kernel"]
 
 [dependency-groups]
 dev = [
+    "furo>=2024.8.6",
     "git-changelog>=2.9.4",
     "jupyterlab>=4.2.0",
+    "myst-parser>=4.0.1",
     "pre-commit>=4.2.0",
     "pytest>=8.3.0",
     "ruff>=0.11.0",
+    "sphinx>=7.4,<9",
 ]
 
 [tool.uv.dependency-groups]

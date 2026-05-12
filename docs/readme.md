@@ -1,8 +1,8 @@
-# Fish Kernel for Jupyter
+# README
 
 `fish-kernel` is a Jupyter kernel implementation for the fish shell.
 
-![](./README.png)
+![](_static/README.png)
 
 ## Requirements
 
@@ -53,15 +53,6 @@ uv sync --dev
 uv run pytest
 uv run fish-kernel install --sys-prefix
 uv run jupyter kernelspec list
-```
-
-## Documentation
-
-Build docs locally with Sphinx + Furo:
-
-```shell
-uv sync --dev
-uv run sphinx-build -b html docs docs/_build/html
 ```
 
 ## Usage examples
