@@ -21,4 +21,5 @@ Install fish and ensure `fish` is on `PATH`.
 ## Platform support
 
 - Linux and macOS are supported.
+- Windows is supported when you run inside WSL.
 - Native Windows is not supported because this project depends on fish shell.

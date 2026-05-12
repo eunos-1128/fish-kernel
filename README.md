@@ -9,7 +9,7 @@
 - Python `>=3.10`
 - `fish` command available on `PATH`
 - Jupyter frontend (`jupyterlab` or notebook)
-- Supported OS: Linux, macOS
+- Supported OS: Linux, macOS, and Windows (WSL)
 - Native Windows is not supported (fish shell dependency)
 
 ## Install
