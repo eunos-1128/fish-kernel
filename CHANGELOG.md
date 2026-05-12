@@ -6,12 +6,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
-## [v0.1.0](https://github.com/eunos-1128/fish-kernel/releases/tag/v0.1.0) - 2026-05-11
+## [v1.0.0](https://github.com/eunos-1128/fish-kernel/releases/tag/v1.0.0) - 2026-05-12
 
-<small>[Compare with first commit](https://github.com/eunos-1128/fish-kernel/compare/159b9a55dd7186527636d458badf685185f2f14d...v0.1.0)</small>
+<small>[Compare with first commit](https://github.com/eunos-1128/fish-kernel/compare/159b9a55dd7186527636d458badf685185f2f14d...v1.0.0)</small>
 
 ### Added
 
+- Add end-to-end tests for Fish kernel ([6159296](https://github.com/eunos-1128/fish-kernel/commit/6159296255c54955f8d7e159fd1e6e533a62351b) by UENO, M.).
 - Add tests for CLI, install, and text processing ([9f53ede](https://github.com/eunos-1128/fish-kernel/commit/9f53ede83c738a77be601f7ed20567107c9b49a6) by UENO, M.).
 - Add CHANGELOG with v0.1.0 entries ([6e6c4c7](https://github.com/eunos-1128/fish-kernel/commit/6e6c4c74cf01e0f63029f643cc01bc9d08d08f5d) by UENO, M.).
 - Add v0.1.0 release to changelog ([a62c593](https://github.com/eunos-1128/fish-kernel/commit/a62c593b10524c4bdfcdccaa00c210d18545e938) by UENO, M.).
@@ -46,6 +47,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
+- Remove inline code formatting from README links ([1aec2d8](https://github.com/eunos-1128/fish-kernel/commit/1aec2d880254c6793a975bfa95775c0f20bd53a9) by UENO, M.).
 - Remove CHANGELOG.md ([b744c92](https://github.com/eunos-1128/fish-kernel/commit/b744c92fb789b6b115e12b937439b318502f0662) by UENO, M.).
 - Remove unused main.py ([1a5a8f5](https://github.com/eunos-1128/fish-kernel/commit/1a5a8f5dc4bc23e6d5bf90c5e5ff2e409263ccea) by UENO, M.).
 
