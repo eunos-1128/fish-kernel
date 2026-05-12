@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+- Add Sphinx+Furo docs site and GitHub Pages workflow ([e17de87](https://github.com/eunos-1128/fish-kernel/commit/e17de87610e41eb9f897a4dd1ddc3e581e94a3bc) by UENO, M.).
 - Add end-to-end tests for Fish kernel ([6159296](https://github.com/eunos-1128/fish-kernel/commit/6159296255c54955f8d7e159fd1e6e533a62351b) by UENO, M.).
 - Add tests for CLI, install, and text processing ([9f53ede](https://github.com/eunos-1128/fish-kernel/commit/9f53ede83c738a77be601f7ed20567107c9b49a6) by UENO, M.).
 - Add CHANGELOG with v0.1.0 entries ([6e6c4c7](https://github.com/eunos-1128/fish-kernel/commit/6e6c4c74cf01e0f63029f643cc01bc9d08d08f5d) by UENO, M.).
