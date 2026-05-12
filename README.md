@@ -7,18 +7,20 @@
 ## Requirements
 
 - Python `>=3.10`
-- `fish` command available on `PATH` (tested with fish `4.7.1`)
+- `fish` command available on `PATH`
 - Jupyter frontend (`jupyterlab` or notebook)
+- Supported OS: Linux, macOS
+- Native Windows is not supported (fish shell dependency)
 
 ## Install
 
-### From PyPI
+### PyPI
 
 ```shell
 pip install fish-kernel
 ```
 
-### Register kernelspec
+After installation, register the kernelspec.
 
 `fish-kernel install` requires one of `--user`, `--sys-prefix`, or `--prefix`.
 
@@ -34,7 +36,7 @@ Or install into the current Python environment:
 fish-kernel install --sys-prefix
 ```
 
-### Verify
+After installation, verify the kernel is registered:
 
 ```shell
 jupyter kernelspec list

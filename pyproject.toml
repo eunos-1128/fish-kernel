@@ -16,7 +16,7 @@ dependencies = [
 dynamic = ["version"]
 keywords = ["fish", "jupyter", "kernel", "ipykernel"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Framework :: Jupyter",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: BSD License",
