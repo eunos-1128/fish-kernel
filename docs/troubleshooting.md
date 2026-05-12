@@ -18,6 +18,7 @@ You must pass one of:
 
 Install fish and ensure `fish` is on `PATH`.
 
-## Native Windows does not work
+## Platform support
 
-This project depends on fish shell and currently supports Linux and macOS.
+- Linux and macOS are supported.
+- Native Windows is not supported because this project depends on fish shell.
