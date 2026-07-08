@@ -21,7 +21,7 @@ kernel_json = {
 }
 
 
-def install_my_kernel_spec(user: bool = True, prefix: str = None):
+def install_my_kernel_spec(user: bool = True, prefix: Optional[str] = None):
     with tempfile.TemporaryDirectory() as td:
         os.chmod(td, 0o755)  # Starts off as 700, not user readable
         with open(os.path.join(td, "kernel.json"), "w") as f:

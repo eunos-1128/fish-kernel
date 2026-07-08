@@ -38,3 +38,48 @@ def test_main_install_delegates_to_install_module(monkeypatch):
 
     assert exit_code == 7
     assert observed["args"] == ["--user"]
+
+
+def test_main_add_delegates_to_install_module(monkeypatch):
+    observed = {}
+
+    def fake_install_main(args):
+        observed["args"] = args
+        return 7
+
+    monkeypatch.setattr(cli, "install_main", fake_install_main)
+
+    exit_code = cli.main(["add", "--user"])
+
+    assert exit_code == 7
+    assert observed["args"] == ["--user"]
+
+
+def test_main_remove_delegates_to_remove_module(monkeypatch):
+    observed = {}
+
+    def fake_remove_main(args):
+        observed["args"] = args
+        return 3
+
+    monkeypatch.setattr(cli, "remove_main", fake_remove_main)
+
+    exit_code = cli.main(["remove"])
+
+    assert exit_code == 3
+    assert observed["args"] == []
+
+
+def test_main_uninstall_delegates_to_remove_module(monkeypatch):
+    observed = {}
+
+    def fake_remove_main(args):
+        observed["args"] = args
+        return 3
+
+    monkeypatch.setattr(cli, "remove_main", fake_remove_main)
+
+    exit_code = cli.main(["uninstall"])
+
+    assert exit_code == 3
+    assert observed["args"] == []

@@ -55,6 +55,7 @@ is your friend to debug the format of the content message.
 import base64
 import os
 import re
+from typing import Callable, TypedDict
 
 import filetype
 
@@ -228,7 +229,13 @@ def _filename_and_display_id(line):
 
 
 # Maps content prefixes to function that display its contents.
-CONTENT_DATA_PREFIXES = {
+class _ContentTypeInfo(TypedDict):
+    display_cmd: str
+    display_data_fn: Callable[[str], dict]
+    capability: str
+
+
+CONTENT_DATA_PREFIXES: dict[str, _ContentTypeInfo] = {
     _TEXT_SAVED_IMAGE: {
         "display_cmd": "display",
         "display_data_fn": display_data_for_image,

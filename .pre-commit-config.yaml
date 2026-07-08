@@ -11,3 +11,9 @@ repos:
         entry: uv run ruff format
         language: system
         types_or: [python, pyi]
+      - id: ty-check
+        name: ty check
+        entry: uv run ty check
+        language: system
+        types_or: [python, pyi]
+        pass_filenames: false

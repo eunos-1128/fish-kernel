@@ -151,7 +151,7 @@ class FishKernel(Kernel):
     @property
     def language_version(self):
         m = version_pat.search(self.banner)
-        return m.group(1)
+        return m.group(1) if m else "unknown"
 
     _banner = None
 
@@ -218,6 +218,9 @@ class FishKernel(Kernel):
         store_history=True,
         user_expressions=None,
         allow_stdin=False,
+        *,
+        cell_meta=None,
+        cell_id=None,
     ):
         self.silent = silent
         if not code.strip():
