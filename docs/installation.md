@@ -31,7 +31,7 @@ mamba install -c conda-forge fish-kernel
 ```
 
 ```shell
-pixi add fish-kernel -c conda-forge
+pixi add fish-kernel
 ```
 
 ## Register kernelspec
