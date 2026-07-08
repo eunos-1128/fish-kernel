@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 <!-- insertion marker -->
+## [v1.1.0](https://github.com/eunos-1128/fish-kernel/releases/tag/v1.1.0) - 2026-07-08
+
+<small>[Compare with v1.0.0](https://github.com/eunos-1128/fish-kernel/compare/v1.0.0...v1.1.0)</small>
+
+### Added
+
+- Add `fish-kernel add`/`remove` commands with `install`/`uninstall` aliases (#9) ([6226891](https://github.com/eunos-1128/fish-kernel/commit/622689147ff68ef4552b08c0a5e20ff3e0bde80b) by UENO, M.).
+- Add kernel registration instructions to README ([af03805](https://github.com/eunos-1128/fish-kernel/commit/af0380564feda64cf9ed9b3eea55f8d32bc2a6fa) by UENO, M.).
+
 ## [v1.0.0](https://github.com/eunos-1128/fish-kernel/releases/tag/v1.0.0) - 2026-05-12
 
 <small>[Compare with first commit](https://github.com/eunos-1128/fish-kernel/compare/159b9a55dd7186527636d458badf685185f2f14d...v1.0.0)</small>
@@ -51,4 +60,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Remove inline code formatting from README links ([1aec2d8](https://github.com/eunos-1128/fish-kernel/commit/1aec2d880254c6793a975bfa95775c0f20bd53a9) by UENO, M.).
 - Remove CHANGELOG.md ([b744c92](https://github.com/eunos-1128/fish-kernel/commit/b744c92fb789b6b115e12b937439b318502f0662) by UENO, M.).
 - Remove unused main.py ([1a5a8f5](https://github.com/eunos-1128/fish-kernel/commit/1a5a8f5dc4bc23e6d5bf90c5e5ff2e409263ccea) by UENO, M.).
-
