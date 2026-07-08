@@ -14,6 +14,8 @@
 
 ## Install
 
+To register a Jupyter kernel, install the kernel spec with `fish-kernel install`.
+
 ### PyPI
 
 ```shell
