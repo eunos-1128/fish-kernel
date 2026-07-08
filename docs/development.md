@@ -14,6 +14,16 @@ uv sync --dev
 uv run pytest
 ```
 
+## Lint and type-check
+
+```shell
+uv run ruff check
+uv run ruff format --check
+uv run ty check
+```
+
+These also run automatically via `pre-commit` (see `.pre-commit-config.yaml`).
+
 ## Build package
 
 ```shell
