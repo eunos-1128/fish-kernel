@@ -14,20 +14,6 @@
 
 ## Install
 
-To register a Jupyter kernel, run a concrete install command such as:
-
-```shell
-fish-kernel add --user
-```
-
-If you want to install into the current Python environment instead, use:
-
-```shell
-fish-kernel add --sys-prefix
-```
-
-`fish-kernel install` is an alias of `fish-kernel add`, so either name works.
-
 ### PyPI
 
 ```shell
@@ -51,6 +37,7 @@ pixi add fish-kernel
 ```
 
 ## Register kernel
+
 After installation, register the kernelspec.
 
 `fish-kernel add` requires one of `--user`, `--sys-prefix`, or `--prefix`.
