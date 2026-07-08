@@ -6,6 +6,22 @@
 pip install fish-kernel
 ```
 
+## Install from conda-forge
+
+Install from the conda-forge channel with conda, mamba, or pixi:
+
+```shell
+conda install -c conda-forge fish-kernel
+```
+
+```shell
+mamba install -c conda-forge fish-kernel
+```
+
+```shell
+pixi add fish-kernel -c conda-forge
+```
+
 ## Register kernelspec
 
 `fish-kernel install` requires exactly one target option.

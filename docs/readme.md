@@ -20,6 +20,22 @@
 pip install fish-kernel
 ```
 
+### conda-forge
+
+Install from the conda-forge channel with conda, mamba, or pixi:
+
+```shell
+conda install -c conda-forge fish-kernel
+```
+
+```shell
+mamba install -c conda-forge fish-kernel
+```
+
+```shell
+pixi add fish-kernel -c conda-forge
+```
+
 After installation, register the kernelspec.
 
 `fish-kernel install` requires one of `--user`, `--sys-prefix`, or `--prefix`.
