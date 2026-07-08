@@ -48,6 +48,7 @@ mamba install -c conda-forge fish-kernel
 pixi add fish-kernel
 ```
 
+## Register kernel
 After installation, register the kernelspec.
 
 `fish-kernel install` requires one of `--user`, `--sys-prefix`, or `--prefix`.
