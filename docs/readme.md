@@ -17,14 +17,16 @@
 To register a Jupyter kernel, run a concrete install command such as:
 
 ```shell
-fish-kernel install --user
+fish-kernel add --user
 ```
 
 If you want to install into the current Python environment instead, use:
 
 ```shell
-fish-kernel install --sys-prefix
+fish-kernel add --sys-prefix
 ```
+
+`fish-kernel install` is an alias of `fish-kernel add`, so either name works.
 
 ### PyPI
 
@@ -50,18 +52,18 @@ pixi add fish-kernel
 
 After installation, register the kernelspec.
 
-`fish-kernel install` requires one of `--user`, `--sys-prefix`, or `--prefix`.
+`fish-kernel add` requires one of `--user`, `--sys-prefix`, or `--prefix`.
 
 Install for your user account:
 
 ```shell
-fish-kernel install --user
+fish-kernel add --user
 ```
 
 Or install into the current Python environment:
 
 ```shell
-fish-kernel install --sys-prefix
+fish-kernel add --sys-prefix
 ```
 
 After installation, verify the kernel is registered:
@@ -71,6 +73,9 @@ jupyter kernelspec list
 ```
 
 You should see a `fish` kernel entry.
+
+To unregister the kernelspec, run `fish-kernel remove` (or its alias
+`fish-kernel uninstall`).
 
 ## Development
 
