@@ -14,105 +14,45 @@
 
 ## Install
 
-### PyPI
-
 ```shell
 pip install fish-kernel
 ```
 
-### conda-forge
-
-Install from the conda-forge channel with conda, mamba, or pixi:
+Or from conda-forge with conda, mamba, or pixi:
 
 ```shell
 conda install -c conda-forge fish-kernel
-```
-
-```shell
 mamba install -c conda-forge fish-kernel
-```
-
-```shell
 pixi add fish-kernel
 ```
 
-## Register kernel
-
-After installation, register the kernelspec.
-
-`fish-kernel add` requires one of `--user`, `--sys-prefix`, or `--prefix`.
-`fish-kernel install` is an alias of `fish-kernel add`.
-
-Install for your user account:
+Then register the kernelspec:
 
 ```shell
 fish-kernel add --user
 ```
 
-Or install into the current Python environment:
-
-```shell
-fish-kernel add --sys-prefix
-```
-
-After installation, verify the kernel is registered:
+Verify it is registered:
 
 ```shell
 jupyter kernelspec list
 ```
 
-You should see a `fish` kernel entry.
+To unregister it later, run `fish-kernel remove`.
 
-## Remove kernel
-
-To unregister the kernelspec, run:
-
-```shell
-fish-kernel remove
-```
-
-`fish-kernel uninstall` is an alias of `fish-kernel remove`.
-
-Unlike `add`, a target option is optional. With no options, `remove` deletes
-whichever installed copy it finds first. If you installed the kernel into
-more than one scope (for example both `--user` and `--sys-prefix`), pass the
-matching option to target a specific one:
-
-```shell
-fish-kernel remove --user
-fish-kernel remove --sys-prefix
-fish-kernel remove --prefix /path/to/prefix
-```
-
-## Development
-
-```shell
-git clone https://github.com/eunos-1128/fish-kernel.git
-cd fish-kernel
-uv sync --dev
-uv run pytest
-uv run fish-kernel install --sys-prefix
-uv run jupyter kernelspec list
-```
-
-## Documentation
-
-Build docs locally with Sphinx + Furo:
-
-```shell
-uv sync --dev
-uv run sphinx-build -b html docs docs/_build/html
-```
-
-## Usage examples
-
-Simple calculation:
+## Usage example
 
 ```fish
 set a 7
 set b 13
 math $a + $b
 ```
+
+## Documentation
+
+Full documentation, including all install options, usage, development, and
+troubleshooting, is available at
+<https://eunos-1128.github.io/fish-kernel/>.
 
 ## Acknowledgements
 
