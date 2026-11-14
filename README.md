@@ -6,7 +6,7 @@
 
 ## Requirements
 
-- Python `>=3.10`
+- Python `>=3.11.5`
 - `fish` command available on `PATH`
 - Jupyter frontend (`jupyterlab` or notebook)
 - Supported OS: Linux, macOS, and Windows (WSL)
